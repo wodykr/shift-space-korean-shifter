@@ -81,3 +81,40 @@ ShiftSpaceSwitcher/
 - 프로젝트는 macOS 13 이상을 대상으로 합니다. 이전 버전에서는 배포 타겟 조정이 필요할 수 있습니다.
 - 보안 입력 감지는 문서화되지 않은 `CGSIsSecureEventInputEnabled` 심볼을 사용하지만, 많은 유틸리티에서 일반적으로 사용되는 macOS 비공개 API입니다.
 - Input Monitoring 또는 Accessibility 권한 중 하나라도 취소되면 앱은 두 권한이 모두 복원될 때까지 비활성화됩니다.
+
+## 라이선스 및 오픈소스
+
+이 프로젝트는 개발자 본인이 필요해서 바이브코딩으로 뚝딱 만든 도구입니다. 🛠️
+
+필요하신 분은 얼마든지 가져가서 마음대로 사용하시고, 뜯어고치고, 개선하고, 배포하셔도 됩니다.
+상업적으로 사용하셔도 괜찮습니다. 뭐든지 하셔도 좋습니다!
+
+**MIT License** 하에 배포됩니다.
+
+```
+MIT License
+
+Copyright (c) 2024 Korean Shifter Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+만드신 것 중 좋은 개선사항이 있으면 PR 보내주시면 감사하겠습니다! 🙏
