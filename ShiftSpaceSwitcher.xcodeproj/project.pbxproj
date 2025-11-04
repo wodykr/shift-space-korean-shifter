@@ -16,6 +16,7 @@ objects = {
 B9BF720EA8B045E291688D3C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADCE368155FF45068433A5CC /* main.swift */; };
 	3ACA04497B334402BA3D84DC /* SecureInputMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8B66B54F0F4A6690BF03A3 /* SecureInputMonitor.swift */; };
 	4B5A89C3D7E24F1FA8B9E123 /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7F45A1B2C34E8D9F1A2B3C /* LoginItemManager.swift */; };
+036F62C4C2AC4EE2983E259F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0B48FD0CB6D44F9A4A0275B /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,9 +29,10 @@ D609DC7F30924CF9947A7951 /* TinyHUD.swift */ = {isa = PBXFileReference; lastKnow
 1875F912AF1546D78AAF7A1D /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 ADCE368155FF45068433A5CC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 00A5E04E8D374942938007AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-79FA0E95176246B2BB88CBCA /* ShiftSpaceSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShiftSpaceSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+79FA0E95176246B2BB88CBCA /* Korean Shifter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Korean Shifter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 	AF8B66B54F0F4A6690BF03A3 /* SecureInputMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureInputMonitor.swift; sourceTree = "<group>"; };
 	9D7F45A1B2C34E8D9F1A2B3C /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
+F0B48FD0CB6D44F9A4A0275B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +61,7 @@ D609DC7F30924CF9947A7951 /* TinyHUD.swift */,
 AF8B66B54F0F4A6690BF03A3 /* SecureInputMonitor.swift */,
 9D7F45A1B2C34E8D9F1A2B3C /* LoginItemManager.swift */,
 ADCE368155FF45068433A5CC /* main.swift */,
+F0B48FD0CB6D44F9A4A0275B /* Assets.xcassets */,
 00A5E04E8D374942938007AC /* Info.plist */,
 );
 path = ShiftSpaceSwitcher;
@@ -67,7 +70,7 @@ sourceTree = "<group>";
 28E6F6B3A6554733A9BC61F5 /* Products */ = {
 isa = PBXGroup;
 children = (
-79FA0E95176246B2BB88CBCA /* ShiftSpaceSwitcher.app */,
+79FA0E95176246B2BB88CBCA /* Korean Shifter.app */,
 );
 name = Products;
 sourceTree = "<group>";
@@ -75,9 +78,9 @@ sourceTree = "<group>";
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-7C2DE018DD384A2AB0AE23D4 /* ShiftSpaceSwitcher */ = {
+7C2DE018DD384A2AB0AE23D4 /* Korean Shifter */ = {
 isa = PBXNativeTarget;
-buildConfigurationList = BC03F6ADFD734A09A2FCCD02 /* Build configuration list for PBXNativeTarget "ShiftSpaceSwitcher" */;
+buildConfigurationList = BC03F6ADFD734A09A2FCCD02 /* Build configuration list for PBXNativeTarget "Korean Shifter" */;
 buildPhases = (
 12AB631DC5B84A51850D1440 /* Sources */,
 A822FFC2453049E4B6B71D7E /* Frameworks */,
@@ -85,9 +88,9 @@ ABDAA20B1C2D4D439D6695C5 /* Resources */,
 );
 buildRules = ( );
 dependencies = ( );
-name = ShiftSpaceSwitcher;
-productName = ShiftSpaceSwitcher;
-productReference = 79FA0E95176246B2BB88CBCA /* ShiftSpaceSwitcher.app */;
+name = "Korean Shifter";
+productName = "Korean Shifter";
+productReference = 79FA0E95176246B2BB88CBCA /* Korean Shifter.app */;
 productType = "com.apple.product-type.application";
 };
 /* End PBXNativeTarget section */
@@ -117,13 +120,15 @@ productRefGroup = 28E6F6B3A6554733A9BC61F5 /* Products */;
 projectDirPath = "";
 projectRoot = "";
 targets = (
-7C2DE018DD384A2AB0AE23D4 /* ShiftSpaceSwitcher */,
+7C2DE018DD384A2AB0AE23D4 /* Korean Shifter */,
 );
 };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-ABDAA20B1C2D4D439D6695C5 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+ABDAA20B1C2D4D439D6695C5 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
+                036F62C4C2AC4EE2983E259F /* Assets.xcassets in Resources */,
+        ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -176,7 +181,7 @@ CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 CLANG_WARN_STRICT_PROTOTYPES = YES;
 CLANG_WARN_SUSPICIOUS_MOVE = YES;
 CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-CODE_SIGN_STYLE = Automatic;
+CODE_SIGN_STYLE = Manual;
 COMBINE_HIDPI_IMAGES = YES;
 COPY_PHASE_STRIP = NO;
 CURRENT_PROJECT_VERSION = 1;
@@ -239,7 +244,8 @@ CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 CLANG_WARN_STRICT_PROTOTYPES = YES;
 CLANG_WARN_SUSPICIOUS_MOVE = YES;
 CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-CODE_SIGN_STYLE = Automatic;
+CODE_SIGN_STYLE = Manual;
+code_sign_identity="ShiftSpace Local Dev";
 COMBINE_HIDPI_IMAGES = YES;
 COPY_PHASE_STRIP = NO;
 CURRENT_PROJECT_VERSION = 1;
@@ -279,8 +285,8 @@ LD_RUNPATH_SEARCH_PATHS = (
 "@executable_path/../Frameworks",
 );
 MACOSX_DEPLOYMENT_TARGET = 13.0;
-PRODUCT_BUNDLE_IDENTIFIER = com.example.ShiftSpaceSwitcher;
-PRODUCT_NAME = "$(TARGET_NAME)";
+			PRODUCT_BUNDLE_IDENTIFIER = com.example.koreanshifter;
+			PRODUCT_NAME = "Korean Shifter";
 SWIFT_VERSION = 5.0;
 };
 name = Debug;
@@ -298,8 +304,8 @@ LD_RUNPATH_SEARCH_PATHS = (
 "@executable_path/../Frameworks",
 );
 MACOSX_DEPLOYMENT_TARGET = 13.0;
-PRODUCT_BUNDLE_IDENTIFIER = com.example.ShiftSpaceSwitcher;
-PRODUCT_NAME = "$(TARGET_NAME)";
+			PRODUCT_BUNDLE_IDENTIFIER = com.example.koreanshifter;
+			PRODUCT_NAME = "Korean Shifter";
 SWIFT_VERSION = 5.0;
 };
 name = Release;
@@ -316,7 +322,7 @@ EA27F19BAB934C7CAF5BADFA /* Debug */,
 defaultConfigurationIsVisible = 0;
 defaultConfigurationName = Release;
 };
-BC03F6ADFD734A09A2FCCD02 /* Build configuration list for PBXNativeTarget "ShiftSpaceSwitcher" */ = {
+BC03F6ADFD734A09A2FCCD02 /* Build configuration list for PBXNativeTarget "Korean Shifter" */ = {
 isa = XCConfigurationList;
 buildConfigurations = (
 8033FE1FABA04441857F4092 /* Debug */,

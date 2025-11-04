@@ -10,8 +10,10 @@
 <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 <key>CFBundleInfoDictionaryVersion</key>
 <string>6.0</string>
-<key>CFBundleName</key>
-<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Korean Shifter</string>
 <key>CFBundlePackageType</key>
 <string>APPL</string>
 <key>CFBundleShortVersionString</key>
@@ -22,11 +24,7 @@
 <string>13.0</string>
 <key>LSUIElement</key>
 <true/>
-<key>NSAppleEventsUsageDescription</key>
-<string>This app requires Apple Events to open accessibility preference panes.</string>
 <key>NSInputMonitoringUsageDescription</key>
-<string>ShiftSpaceSwitcher needs to monitor keyboard input to trigger Hangul/English switching.</string>
-<key>NSAccessibilityUsageDescription</key>
-<string>Accessibility access is required for synthesizing key events when configured.</string>
+	<string>Korean Shifter needs to monitor keyboard input to trigger Hangul/English switching.</string>
 </dict>
 </plist>

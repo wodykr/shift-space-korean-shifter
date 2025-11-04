@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ShiftSpaceSwitcher is a macOS menu bar agent that enables Korean/English language switching using the left Shift + Space combination. It uses CGEvent tap to intercept keyboard events and directly toggles the input source using the TIS (Text Input Source) API.
+Korean Shifter is a macOS menu bar agent that enables Korean/English language switching using the left Shift + Space combination. It uses CGEvent tap to intercept keyboard events and directly toggles the input source using the TIS (Text Input Source) API.
 
 ## Build Commands
 
@@ -16,18 +16,21 @@ open ShiftSpaceSwitcher.xcodeproj
 
 **Build from command line:**
 ```bash
-xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -configuration Release build
+xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme "Korean Shifter" -configuration Release build
 ```
 
 **Requirements:**
 - Xcode 15+
 - macOS 13+ (required for login item functionality)
 - Input Monitoring permission (required for keyboard event interception)
+- Accessibility permission (required for trusted event tap and space suppression)
 
 **Permissions:**
 - **Input Monitoring** (required): Allows the app to intercept left Shift + Space key combinations
   - Users are prompted to grant this permission when they first enable the app
   - App automatically opens System Settings > Privacy & Security > Input Monitoring
+- **Accessibility** (required): Allows the app to register a trusted event tap and suppress the trigger space key
+  - Users are prompted to grant trust; the app opens the Accessibility pane if still disabled
 - **Login Item** (no additional permission required): Users can enable "Launch at Login" from the menu
   - Uses SMAppService API (macOS 13+) which doesn't require special entitlements
   - Setting is registered with the system and persists across reboots
@@ -48,7 +51,7 @@ xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -con
 - Maintains state: leftShiftPressed, triggeredDuringCurrentHold
 - Auto-recovers from .tapDisabledByTimeout and .tapDisabledByUserInput
 - Implements multi-tap mode with 90ms debounce
-- Uses CGEvent tap in two modes: observe-only (default) or consume (when Accessibility permission granted); switchHandler returns SwitchAction (.switched, .ignored)
+- Uses a trusted CGEvent tap in consume mode once both permissions are granted; switchHandler returns SwitchAction (.switched, .ignored)
 
 **InputSwitch.swift** - Language switching using TIS API
 - Uses direct TIS (Text Input Source) toggle method only
@@ -74,7 +77,6 @@ xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -con
 **Settings.swift** - UserDefaults persistence for user preferences
 - isEnabled: Master switch for the app functionality
 - showMiniHUD: Whether to show visual feedback on language switch
-- multiTapEnabled: Whether to allow multiple switches during single Shift hold
 - loginItemEnabled: Whether to launch app at login
 
 **LoginItemManager.swift** - Login item management (macOS 13+)
@@ -89,11 +91,11 @@ xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -con
 **Permission Handling Flow:**
 1. On launch, AppDelegate attempts to start EventTap
 2. If Input Monitoring permission is missing → settings.isEnabled is cleared and the UI directs the user to System Settings
-3. Accessibility permission is optional: without it the tap runs in observe-only mode, with it the app consumes the trigger space key
+3. Accessibility permission is also required: the event tap remains stopped until trust is granted, ensuring the trigger space key can be suppressed
 4. When the user enables the app without Input Monitoring permission:
    - Calls IOHIDRequestAccess() to trigger the system prompt
    - Opens System Settings > Privacy & Security > Input Monitoring
-5. When Accessibility permission is absent, the app prompts (via AXIsProcessTrustedWithOptions) and opens the Accessibility pane, but still operates in observe-only mode
+5. When Accessibility permission is absent, the app prompts (via AXIsProcessTrustedWithOptions), opens the Accessibility pane, and keeps the app disabled until permission is granted
 6. Permission revocation is detected via EventTap failure, and the UI updates the state accordingly
 
 **Event Flow:**
@@ -115,8 +117,7 @@ xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -con
 ### Important Constraints
 
 **Multi-tap Mode:**
-- When enabled: allows repeated Space presses while Shift held (90ms debounce)
-- When disabled: only first Space press triggers switch during Shift hold
+- Always enabled: allows repeated Space presses while Shift held (90ms debounce)
 - Controlled by triggeredDuringCurrentHold flag reset on Shift release
 
 **Secure Input Detection:**
@@ -127,7 +128,7 @@ xcodebuild -project ShiftSpaceSwitcher.xcodeproj -scheme ShiftSpaceSwitcher -con
 
 ```
 ShiftSpaceSwitcher/
-├─ ShiftSpaceSwitcher.xcodeproj
+├─ ShiftSpaceSwitcher.xcodeproj    # Historical project name
 └─ ShiftSpaceSwitcher/
    ├─ main.swift               # Entry point, sets up NSApplication
    ├─ AppDelegate.swift         # Main coordinator
@@ -146,15 +147,15 @@ ShiftSpaceSwitcher/
 
 **Manual Testing Checklist:**
 - Test without Input Monitoring permission (app should be disabled, prompt on enable)
+- Test without Accessibility permission (app should be disabled, prompt on enable)
 - Test switching in secure input contexts like password fields (should ignore the request)
-- Test multi-tap mode vs single-tap mode behavior
+- Test multi-tap behavior by holding Shift and tapping Space repeatedly
 - Test recovery from CGEvent tap timeout (happens after ~60 seconds of inactivity)
 - Test with unsupported input sources (non-whitelisted languages should not switch)
 - Verify HUD shows correct symbol after switch ("A" or "가")
 - Verify status icon reflects current language correctly
 - Test login item functionality (enable, restart Mac, verify app auto-launches)
-- Test permission revocation while running (remove Input Monitoring, verify app auto-disables)
-- Toggle Accessibility permission on/off to confirm the app falls back to observe-only mode (space passes through)
+- Test permission revocation while running (remove either permission, verify app auto-disables)
 
 **Known Private API Usage:**
 - CGSIsSecureEventInputEnabled (in SecureInputMonitor.swift) - widely used but undocumented

@@ -19,6 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var needsInputMonitoringPermission: Bool = false
     private var needsAccessibilityPermission: Bool = false
     private var isSecureInputActive: Bool = false
+    private var didSeedInputMonitoringRegistration: Bool = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -56,7 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.needsInputMonitoringPermission = !hasInputPermission
                 self?.needsAccessibilityPermission = !hasAccessibilityPermission
                 if self?.needsInputMonitoringPermission == true {
-                    self?.settings.isEnabled = false  // Auto-disable if no Input Monitoring permission
+                    self?.didSeedInputMonitoringRegistration = false
                 }
                 self?.eventTap.stop()
                 self?.refreshState()
@@ -87,17 +88,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         print("  - IOHIDCheckAccess result: \(hasInputPermission ? "granted" : "not granted")")
 
         needsInputMonitoringPermission = !hasInputPermission
-        if needsInputMonitoringPermission && settings.isEnabled {
-            print("  ⚠️ Permission missing on launch - disabling setting")
-            settings.isEnabled = false
+        if needsInputMonitoringPermission {
+            didSeedInputMonitoringRegistration = false
+        } else {
+            _ = ensureInputMonitoringRegistration(allowPrompt: false)
         }
 
         let hasAccessibilityPermission = AXIsProcessTrusted()
         print("  - AXIsProcessTrusted: \(hasAccessibilityPermission)")
         needsAccessibilityPermission = !hasAccessibilityPermission
 
-        if needsInputMonitoringPermission {
-            ensureInputMonitoringRegistration()
+        if hasInputPermission {
+            _ = ensureInputMonitoringRegistration(allowPrompt: false)
         }
 
         // If we have permission and settings say enabled, start the tap
@@ -111,7 +113,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         print("  - settings.isEnabled: \(settings.isEnabled)")
         print("  - needsAccessibilityPermission: \(needsAccessibilityPermission)")
 
-        eventTap.multiTapEnabled = settings.multiTapEnabled
+        eventTap.multiTapEnabled = true
         guard settings.isEnabled else {
             print("  ❌ Not enabled - stopping event tap")
             eventTap.stop()
@@ -125,24 +127,78 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let hasAccessibilityPermission = AXIsProcessTrusted()
-        needsAccessibilityPermission = !hasAccessibilityPermission
+        if !hasAccessibilityPermission {
+            print("  ❌ Need Accessibility permission - stopping event tap")
+            needsAccessibilityPermission = true
+            eventTap.stop()
+            return
+        }
 
-        let mode: EventTap.Mode = hasAccessibilityPermission ? .consume : .observeOnly
-        print("  ✅ Starting event tap (mode: \(mode == .consume ? "consume" : "observe"))")
-        _ = eventTap.start(mode: mode)
+        needsAccessibilityPermission = false
+
+        print("  ✅ Starting event tap (mode: consume)")
+        _ = eventTap.start(mode: .consume)
     }
 
-    private func ensureInputMonitoringRegistration() {
-        print("📇 ensureInputMonitoringRegistration - probing Input Monitoring entry")
-        let started = eventTap.start(mode: .observeOnly)
-        if started {
-            needsInputMonitoringPermission = false
-            DispatchQueue.main.async { [weak self] in
-                self?.eventTap.stop()
-                self?.refreshState()
+    @discardableResult
+    private func ensureInputMonitoringRegistration(allowPrompt: Bool) -> Bool {
+        let hasPermissionBefore = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+
+        if allowPrompt && !hasPermissionBefore {
+            let granted = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+            print("📇 IOHIDRequestAccess returned: \(granted)")
+        }
+
+        let hasPermissionAfter = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+        needsInputMonitoringPermission = !hasPermissionAfter
+        guard hasPermissionAfter else {
+            didSeedInputMonitoringRegistration = false
+            return false
+        }
+
+        if !didSeedInputMonitoringRegistration {
+            let seeded = seedInputMonitoringEntry()
+            didSeedInputMonitoringRegistration = seeded
+            if !seeded {
+                needsInputMonitoringPermission = true
+                return false
             }
         }
+
+        return true
     }
+
+    private func seedInputMonitoringEntry() -> Bool {
+        let eventMask = (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.keyDown.rawValue)
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: CGEventMask(eventMask),
+            callback: { _, _, event, _ in
+                return Unmanaged.passUnretained(event)
+            },
+            userInfo: nil
+        ) else {
+            print("⚠️ seedInputMonitoringEntry: tapCreate failed")
+            return false
+        }
+
+        guard let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) else {
+            CFMachPortInvalidate(tap)
+            print("⚠️ seedInputMonitoringEntry: failed to create run loop source")
+            return false
+        }
+
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+        CGEvent.tapEnable(tap: tap, enable: false)
+        CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
+        CFRunLoopSourceInvalidate(source)
+        CFMachPortInvalidate(tap)
+        return true
+    }
+
     private func handleSwitchRequest() -> EventTap.SwitchAction {
         print("🔵 handleSwitchRequest called")
         print("  - settings.isEnabled: \(settings.isEnabled)")
@@ -158,6 +214,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if needsInputMonitoringPermission {
             print("  ❌ Need permission - ignoring trigger")
+            return .ignored
+        }
+
+        if needsAccessibilityPermission {
+            print("  ❌ Need accessibility permission - ignoring trigger")
             return .ignored
         }
 
@@ -177,7 +238,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if didSwitch {
             if settings.showMiniHUD {
-                tinyHUD.show(symbol: inputSwitch.currentSymbol(), animated: !settings.disableAnimation)
+                tinyHUD.show(symbol: inputSwitch.currentSymbol())
             }
             DispatchQueue.main.async { [weak self] in
                 self?.refreshState()
@@ -193,8 +254,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let context = StatusMenu.Context(
             isMasterEnabled: settings.isEnabled,
             showMiniHUD: settings.showMiniHUD,
-            multiTapEnabled: settings.multiTapEnabled,
-            disableAnimation: settings.disableAnimation,
             loginItemEnabled: settings.loginItemEnabled,
             isSwitchAvailable: inputSwitch.hasSupportedPair,
             isSecureInputActive: isSecureInputActive,
@@ -212,49 +271,55 @@ extension AppDelegate: StatusMenuDelegate {
         print("📱 User toggled enabled: \(isEnabled)")
 
         if isEnabled {
-            // User wants to enable
             print("  🔄 Attempting to enable...")
 
-            // Check current permission status
-            let hasInputPermission = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
-            let hasAccessibilityPermission = AXIsProcessTrusted()
-            print("  - Input Monitoring status: \(hasInputPermission ? "granted" : "not granted")")
-            print("  - Accessibility status: \(hasAccessibilityPermission ? "granted" : "not granted")")
+            let inputPermissionBefore = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+            let accessibilityPermissionBefore = AXIsProcessTrusted()
+            print("  - Input Monitoring status: \(inputPermissionBefore ? "granted" : "not granted")")
+            print("  - Accessibility status: \(accessibilityPermissionBefore ? "granted" : "not granted")")
 
-            guard hasInputPermission else {
-                print("  ❌ Input Monitoring permission missing - requesting access")
+            let inputGranted = ensureInputMonitoringRegistration(allowPrompt: !inputPermissionBefore)
+            needsInputMonitoringPermission = !inputGranted
+
+            var accessibilityGranted = accessibilityPermissionBefore
+            if !accessibilityPermissionBefore {
+                print("  ⚠️ Accessibility permission missing - requesting trust")
+                let trusted = Permissions.promptForAccessibilityPermission()
+                accessibilityGranted = trusted || AXIsProcessTrusted()
+                needsAccessibilityPermission = !accessibilityGranted
+                if !accessibilityGranted {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        Permissions.openAccessibility()
+                    }
+                }
+            } else {
+                needsAccessibilityPermission = false
+            }
+
+            if !inputGranted {
                 settings.isEnabled = false
-                needsInputMonitoringPermission = true
-
-                ensureInputMonitoringRegistration()
-
-                let granted = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
-                print("  - IOHIDRequestAccess returned: \(granted)")
-
+                didSeedInputMonitoringRegistration = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     Permissions.openInputMonitoring()
                 }
+                refreshState()
+                return
+            }
 
+            if !accessibilityGranted {
+                settings.isEnabled = false
+                eventTap.stop()
                 refreshState()
                 return
             }
 
             settings.isEnabled = true
             needsInputMonitoringPermission = false
-            needsAccessibilityPermission = !hasAccessibilityPermission
-
-            if !hasAccessibilityPermission {
-                print("  ⚠️ Accessibility permission missing - cannot suppress space key")
-                _ = Permissions.promptForAccessibilityPermission()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    Permissions.openAccessibility()
-                }
-            }
+            needsAccessibilityPermission = false
 
             updateEventTap()
             refreshState()
         } else {
-            // User wants to disable
             print("  ⏸️ Disabling...")
             settings.isEnabled = false
             eventTap.stop()
@@ -264,17 +329,6 @@ extension AppDelegate: StatusMenuDelegate {
 
     func statusMenu(_ menu: StatusMenu, didChangeMiniHUD isEnabled: Bool) {
         settings.showMiniHUD = isEnabled
-        refreshState()
-    }
-
-    func statusMenu(_ menu: StatusMenu, didChangeMultiTap isEnabled: Bool) {
-        settings.multiTapEnabled = isEnabled
-        updateEventTap()
-        refreshState()
-    }
-
-    func statusMenu(_ menu: StatusMenu, didChangeDisableAnimation isEnabled: Bool) {
-        settings.disableAnimation = isEnabled
         refreshState()
     }
 
@@ -311,11 +365,19 @@ extension AppDelegate: StatusMenuDelegate {
 
     func statusMenuRequestedAbout(_ menu: StatusMenu) {
         let alert = NSAlert()
-        alert.messageText = "ShiftSpaceSwitcher"
-        alert.informativeText = "왼쪽 Shift+Space 로 한/영 전환을 수행합니다.\nInput Monitoring 권한이 필요합니다."
+        alert.messageText = "Korean Shifter"
+        alert.informativeText = """
+왼쪽 Shift+Space 조합으로 한/영 전환 하는 것이 익숙한 사람들을 위하여 작은 유틸리티를 만들었습니다. 정상적인 작동을 위하여 [손쉬운 사용] 및 [입력 모니터링] 권한이 필요합니다.
+
+이 프로그램은 오로지 영어/한글 두가지 언어를 사용하는 사람들을 위해 작성되었습니다. 그 외 사용의 경우 오작동 할 수 있으니 주의해주세요.
+"""
         alert.alertStyle = .informational
+        alert.addButton(withTitle: "깃허브 열기")
         alert.addButton(withTitle: "확인")
-        alert.runModal()
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn, let url = URL(string: "https://github.com/wodykr/korean-shifter") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     func statusMenuRequestedQuit(_ menu: StatusMenu) {

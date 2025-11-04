@@ -132,12 +132,12 @@ final class EventTap {
             return Unmanaged.passUnretained(event)
         }
 
-        if event.getIntegerValueField(.keyboardEventAutorepeat) == 1 {
-            return consumeOrPass(event)
-        }
-
         guard leftShiftPressed else {
             return Unmanaged.passUnretained(event)
+        }
+
+        if event.getIntegerValueField(.keyboardEventAutorepeat) == 1 {
+            return consumeOrPass(event)
         }
 
         let currentTime = event.timestampTimeInterval
