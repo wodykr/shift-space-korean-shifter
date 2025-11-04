@@ -4,6 +4,19 @@ Korean Shifter는 **왼쪽 Shift + Space** 키 조합으로 한/영 전환을 �
 
 > Xcode 프로젝트 파일과 소스 코드는 이전 이름인 `ShiftSpaceSwitcher` 디렉토리에 있습니다.
 
+## 설치 방법
+
+### 다운로드 및 설치
+
+1. **[releases](./releases)** 폴더에서 `Korean Shifter.app`을 다운로드합니다.
+2. 다운로드한 `Korean Shifter.app`을 `/Applications` 폴더로 이동합니다.
+3. 앱을 실행하면 메뉴바에 아이콘이 나타납니다.
+4. 메뉴바 아이콘을 클릭하고 **활성화**를 선택합니다.
+5. **Input Monitoring**과 **Accessibility** 권한 요청이 표시되면 시스템 설정에서 권한을 부여합니다.
+6. 권한을 부여한 후 메뉴바 아이콘을 다시 클릭하여 **활성화**를 토글하면 앱이 정상 작동합니다.
+
+> **참고**: macOS에서 다운로드한 앱을 처음 실행할 때 보안 경고가 표시될 수 있습니다. 이 경우 앱을 우클릭(또는 Control+클릭)하고 "열기"를 선택하여 실행할 수 있습니다.
+
 ## 주요 기능
 
 - ✅ 왼쪽 Shift 키(`keyCode 56`)와 Space 키(`keyCode 49`)만 감지하여 오동작을 방지합니다.
@@ -34,7 +47,9 @@ ShiftSpaceSwitcher/
    └─ main.swift
 ```
 
-## 빌드 및 실행
+## 소스에서 빌드하기
+
+개발자이거나 소스 코드에서 직접 빌드하려는 경우:
 
 1. macOS 13+ 환경에서 Xcode 15 이상으로 `ShiftSpaceSwitcher.xcodeproj`를 엽니다.
 2. **Korean Shifter** 스킴을 선택하고 빌드/실행합니다. 앱은 UI 요소로 실행되므로 Dock에 나타나지 않습니다.
