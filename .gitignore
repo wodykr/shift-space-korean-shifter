@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+project.xcworkspace/
+
+# Code signing (NEVER commit these!)
+*.cer
+*.key
+*.p12
+*.mobileprovision
+
+# Temporary files
+*.swp
+*~
+
+# Build products
+build/
+DerivedData/
+
+# Screenshots and images (add specific ones if needed)
+image.png
